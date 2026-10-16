@@ -1,0 +1,213 @@
+/* ==========================================================================
+   H.M. Tours & Travels — MOTION LAYER (additive; style.css is untouched)
+   Loaded AFTER style.css. Pairs with motion.js.
+
+   Rules this file follows:
+   - Hidden "before" states only apply when motion.js is running (html.js),
+     and are removed by html.motion-off if motion.js ever fails.
+   - Every animation lives inside prefers-reduced-motion: no-preference.
+   - Scroll-linked effects use the individual `translate` / `scale`
+     properties, so they never clash with the existing `transform` hover
+     rules in style.css.
+   ========================================================================== */
+
+:root{
+  --m-ease: cubic-bezier(.22,.8,.24,1);
+  --m-dist: 28px;
+}
+@media (max-width: 980px){ :root{ --m-dist: 18px; } }
+
+/* ---------- Anchors: fixed header must never cover a heading ---------- */
+html{ scroll-padding-top: 84px; }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior: auto; } }
+
+/* ---------- Safety net: content is visible if JS / motion.js is absent ---------- */
+html:not(.js) .reveal,
+html.motion-off .reveal{ opacity:1; transform:none; transition:none; }
+html.motion-off .m-item{ opacity:1 !important; translate:none !important; animation:none !important; }
+html.motion-off *,
+html.motion-off *::before{ animation:none !important; }
+
+/* ---------- Scroll progress bar ---------- */
+.scroll-progress{
+  position:fixed; top:0; left:0; right:0; height:3px; z-index:520;
+  pointer-events:none; background:transparent;
+}
+.scroll-progress span{
+  display:block; height:100%; transform-origin:0 50%; transform:scaleX(0);
+  background:linear-gradient(90deg, var(--gold-500), var(--gold-300));
+  box-shadow:0 0 10px rgba(201,162,75,.45);
+  will-change:transform;
+}
+
+/* ---------- Header: readable over the dark hero + softer glass when scrolled ----------
+   (frontend.js toggles .hero-theme on the header itself; the original
+   selector in style.css expected it on an ancestor, so it never matched.) */
+header.hero-theme .brand .name,
+header.hero-theme nav.navlinks a,
+header.hero-theme .icon-btn,
+header.hero-theme .hamburger{ color:#fff; }
+header.hero-theme .icon-btn,
+header.hero-theme .hamburger{ border-color:rgba(255,255,255,.38); }
+header.scrolled{
+  background:var(--bg-elev);
+  background:color-mix(in srgb, var(--bg-elev) 90%, transparent);
+  -webkit-backdrop-filter:saturate(1.3) blur(14px);
+  backdrop-filter:saturate(1.3) blur(14px);
+}
+
+/* Active navigation state (set by motion.js) */
+nav.navlinks a.is-active{ opacity:1; }
+nav.navlinks a.is-active::after{ right:0; }
+header:not(.hero-theme) nav.navlinks a.is-active{ color:var(--emerald-700); }
+[data-theme="dark"] header:not(.hero-theme) nav.navlinks a.is-active{ color:var(--gold-400); }
+.mobile-panel a.is-active{ color:var(--emerald-700); font-weight:600; }
+[data-theme="dark"] .mobile-panel a.is-active{ color:var(--gold-400); }
+
+/* ---------- Closed mobile menu: no shadow bleeding onto the page, and its links
+   are removed from the tab order until it is opened (style.css leaves both in place) ---------- */
+.mobile-panel{ visibility:hidden; transition:transform .35s ease, visibility 0s linear .35s; }
+.mobile-panel:not(.open){ box-shadow:none; }
+.mobile-panel.open{ visibility:visible; transition-delay:0s; }
+
+/* ---------- Umrah cards on phones: index.html hard-codes repeat(5,1fr) inline, which
+   squeezes five columns into ~350px and clips the last card. Two columns on small
+   screens; the odd last card spans the row. Wider screens are unchanged. ---------- */
+@media (max-width: 700px){
+  #umrahGrid{ grid-template-columns:repeat(2,1fr) !important; }
+  #umrahGrid .why-card:last-child:nth-child(odd){ grid-column:1 / -1; }
+}
+
+/* ---------- Focus visibility (keyboard users) ---------- */
+:focus-visible{ outline:2px solid var(--gold-500); outline-offset:3px; }
+.svc-card:focus-visible, .gal-card:focus-visible, .vid-card:focus-visible{ outline-offset:4px; }
+.hero :focus-visible{ outline-color:var(--gold-300); }
+
+/* ---------- Micro-interactions (hover only on real hover devices; :active everywhere) ---------- */
+.btn{ transition:transform .25s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease, color .25s ease; }
+.btn:active{ transform:translateY(0) scale(.97); box-shadow:none; }
+.icon-btn{ transition:background .25s ease, border-color .25s ease, transform .2s ease; }
+.icon-btn:active{ transform:scale(.92); }
+.pill-switch button{ transition:background .25s ease, color .25s ease; }
+.wa-fab{ transition:transform .25s ease; }
+.wa-fab:active{ transform:scale(.94); }
+.why-card .ic, .svc-card .ic-wrap{ transition:transform .35s var(--m-ease); }
+.svc-card .more{ transition:transform .25s ease; }
+.svc-card:active{ transform:translateY(-2px) scale(.985); }
+.gal-card:active, .vid-card:active{ transform:translateY(-2px) scale(.98); }
+.notice-card, .offer-card{ transition:transform .3s var(--m-ease), box-shadow .3s ease, border-color .3s ease; }
+.team-card .ph img, .offer-card .ph img, .hajj-gallery img{ transition:transform .6s var(--m-ease); }
+.stat b{ font-variant-numeric:tabular-nums; }
+
+@media (hover:hover) and (pointer:fine){
+  .btn-ghost-light:hover{ background:rgba(255,255,255,.12); border-color:var(--gold-400); transform:translateY(-2px); }
+  .icon-btn:hover{ background:rgba(201,162,75,.14); border-color:var(--gold-500); }
+  .wa-fab:hover{ transform:scale(1.08); }
+  .why-card:hover .ic{ transform:translateY(-3px) scale(1.12); }
+  .svc-card:hover .ic-wrap{ transform:scale(1.08) rotate(-4deg); }
+  .svc-card:hover .more{ transform:translateX(4px); }
+  .notice-card:hover, .offer-card:hover{ transform:translateY(-4px); box-shadow:var(--shadow); border-color:var(--gold-500); }
+  .team-card:hover .ph img, .offer-card:hover .ph img{ transform:scale(1.06); }
+  .hajj-gallery > div:hover img{ transform:scale(1.04); }
+}
+.notice-card:active, .offer-card:active{ transform:scale(.99); }
+
+/* ==========================================================================
+   Everything below animates -> only when the visitor has not asked for
+   reduced motion.
+   ========================================================================== */
+@media (prefers-reduced-motion: no-preference){
+
+  /* ----- Keyframes (only opacity / translate / scale / clip / filter) ----- */
+  @keyframes mRise   { from{ opacity:0; translate:0 var(--m-dist); } to{ opacity:1; translate:0 0; } }
+  @keyframes mFade   { from{ opacity:0; } to{ opacity:1; } }
+  @keyframes mMask   { from{ opacity:0; translate:0 .4em; clip-path:inset(0 0 100% 0); }
+                       to  { opacity:1; translate:0 0;    clip-path:inset(-12% -4% -22% -4%); } }
+  @keyframes mLine   { from{ transform:scaleX(0); } to{ transform:scaleX(1); } }
+  @keyframes mFocus  { from{ filter:blur(9px); scale:1.12; } to{ filter:blur(0); scale:1; } }
+  @keyframes mClip   { from{ clip-path:inset(0 0 100% 0 round 16px); } to{ clip-path:inset(0 0 0 0 round 16px); } }
+  @keyframes mHeroImg{ from{ opacity:0; scale:.9; filter:blur(12px); } to{ opacity:1; scale:1; filter:blur(0); } }
+
+  /* ----- Hero entrance: eyebrow -> heading -> lead -> CTAs -> trust -> visual ----- */
+  html.js .hero .eyebrow{ animation:mRise .9s var(--m-ease) .12s backwards; }
+  html.js .hero .eyebrow::before{ transform-origin:left center; animation:mLine .9s var(--m-ease) .3s backwards; }
+  html.js .hero h1{ animation:mMask 1.1s var(--m-ease) .28s backwards; }
+  html.js .hero p.lead{ animation:mRise .95s var(--m-ease) .52s backwards; }
+  html.js .hero-ctas{ animation:mRise .95s var(--m-ease) .7s backwards; }
+  html.js .hero .trust-strip{ animation:mRise .95s var(--m-ease) .88s backwards; }
+  html.js .hero-visual .arch-frame{ animation:mHeroImg 1.4s var(--m-ease) .3s backwards; }
+  html.js .hero-visual .float-card{ animation:mRise 1s var(--m-ease) 1.05s backwards; }
+  html.js .hero .scroll-cue{ animation:mFade 1s ease 1.4s backwards; }
+
+  /* Scroll-linked layers get a compositor hint ONLY while scrubbing is on */
+  html.m-scrub .hero-content,
+  html.m-scrub .hero-visual,
+  html.m-scrub .hero-arch-glow{ will-change:translate, opacity; }
+  html.m-scrub .about-photo .arch-frame img,
+  html.m-scrub .hajj-band,
+  html.m-scrub .hajj-gallery > div,
+  html.m-scrub .hajj-gallery img{ will-change:translate, scale; }
+
+  /* ----- Section reveals (the existing .reveal wrapper triggers these) ----- */
+  .reveal.in h2{ animation:mMask 1s var(--m-ease) .1s backwards; }
+  .reveal.in .eyebrow::before{ transform-origin:left center; animation:mLine .9s var(--m-ease) .12s backwards; }
+
+  .reveal.in .about-copy > :not(h2){ animation:mRise .9s var(--m-ease) calc(.1s + var(--n,0) * .09s) backwards; }
+  .reveal.in .about-copy > :nth-child(1){ --n:0; }
+  .reveal.in .about-copy > :nth-child(3){ --n:2; }
+  .reveal.in .about-copy > :nth-child(4){ --n:3; }
+  .reveal.in .about-copy > :nth-child(5){ --n:4; }
+  .reveal.in .about-copy > .stat-row{ animation:none; }
+  .reveal.in .stat{ animation:mRise .85s var(--m-ease) calc(.4s + var(--n,0) * .09s) backwards; }
+  .reveal.in .stat:nth-child(2){ --n:1; } .reveal.in .stat:nth-child(3){ --n:2; } .reveal.in .stat:nth-child(4){ --n:3; }
+
+  .reveal.in .about-photo{ animation:mRise 1s var(--m-ease) .05s backwards; }
+  .reveal.in .about-photo .badge{ animation:mRise .9s var(--m-ease) .55s backwards; }
+  .reveal.in .profile-card{ animation:mRise .9s var(--m-ease) .35s backwards; }
+
+  .reveal.in .contact-row{ animation:mRise .8s var(--m-ease) calc(.08s + var(--n,0) * .07s) backwards; }
+  .reveal.in .contact-row:nth-child(2){ --n:1; } .reveal.in .contact-row:nth-child(3){ --n:2; }
+  .reveal.in .contact-row:nth-child(4){ --n:3; } .reveal.in .contact-row:nth-child(5){ --n:4; }
+  .reveal.in .contact-row:nth-child(6){ --n:5; } .reveal.in .contact-row:nth-child(7){ --n:6; }
+  .reveal.in .cta-row{ animation:mRise .8s var(--m-ease) .6s backwards; }
+  .reveal.in .map-wrap{ animation:mRise 1s var(--m-ease) .2s backwards; }
+  .reveal.in .testi-empty, .reveal.in .tabbed-head .pill-switch{ animation:mRise .9s var(--m-ease) .2s backwards; }
+  .reveal.in .disclaimer, .reveal.in .hajj-band .btn{ animation:mRise .9s var(--m-ease) .45s backwards; }
+
+  /* Hajj gallery + award photo: clip-path reveal, then blur-to-sharp inside */
+  .reveal.in .hajj-gallery > div > div{ animation:mClip 1.1s var(--m-ease) .25s backwards; }
+  .reveal.in .hajj-gallery > .g2 > div{ animation-delay:.4s; }
+  .reveal.in .hajj-gallery img{ animation:mFocus 1.4s var(--m-ease) .25s backwards; }
+  .reveal.in .award-feature > div:not(.eyebrow){ animation:mClip 1.2s var(--m-ease) .2s backwards; }
+  .reveal.in .award-feature img{ animation:mFocus 1.5s var(--m-ease) .2s backwards; }
+
+  /* ----- Per-item staggered reveals (cards, gallery, videos, team...) ----- */
+  html.js .m-item{ opacity:0; translate:0 var(--m-dist); }
+  html.js .m-item.m-in{ opacity:1; translate:0 0; animation:mRise .85s var(--m-ease) var(--d,0ms) backwards; }
+  html.js .gal-card.m-in img,
+  html.js .vid-card.m-in .vid-thumb img,
+  html.js .offer-card.m-in .ph img,
+  html.js .team-card.m-in .ph img{ animation:mFocus 1.1s var(--m-ease) var(--d,0ms) backwards; }
+
+  /* Blur filters are the costliest effect: skip them on small screens */
+  @media (max-width: 980px){
+    .reveal.in .hajj-gallery img, .reveal.in .award-feature img,
+    html.js .gal-card.m-in img, html.js .vid-card.m-in .vid-thumb img,
+    html.js .offer-card.m-in .ph img, html.js .team-card.m-in .ph img{ animation:none; }
+    html.js .hero-visual .arch-frame{ animation-name:mFade; }
+  }
+
+  /* ----- Pinned Hajj band (desktop only; motion.js adds .m-pinned) ----- */
+  #hajj.m-pinned{ min-height:var(--pin-h); }
+  #hajj.m-pinned .hajj-band{ position:sticky; top:var(--pin-top, 96px); }
+}
+
+/* ---------- Touch devices: tap feedback without relying on :hover ---------- */
+@media (hover:none){
+  .btn:active, .icon-btn:active, .svc-card:active, .gal-card:active, .vid-card:active{ transition-duration:.1s; }
+}
+
+@media print{
+  .scroll-progress{ display:none; }
+  .reveal, html.js .m-item{ opacity:1 !important; transform:none !important; translate:none !important; }
+}
